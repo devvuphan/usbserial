@@ -98,8 +98,7 @@ class UsbPort extends AsyncDataSinkSource {
 
   final MethodChannel _channel;
   final EventChannel _eventChannel;
-  Stream<Uint8List>? _inputStream;
-  Stream<ByteArray>? _inputByteStream;
+  Stream<ByteArray>? _inputStream;
 
   int _baudRate = 115200;
   int _dataBits = UsbPort.DATABITS_8;
@@ -138,20 +137,13 @@ class UsbPort extends AsyncDataSinkSource {
   ///
   /// This will print out the data as it arrives from the uart.
   ///
+  ///
   @override
-  Stream<Uint8List>? get inputStream {
+  Stream<ByteArray>? get inputStream {
     if (_inputStream == null) {
-      _inputStream = _eventChannel.receiveBroadcastStream().map<Uint8List>((dynamic value) => value);
+      _inputStream = _eventChannel.receiveBroadcastStream().map<ByteArray>((dynamic value) => value);
     }
     return _inputStream;
-  }
-
-  @override
-  Stream<ByteArray>? get inputByteStream {
-    if (_inputByteStream == null) {
-      _inputByteStream = _eventChannel.receiveBroadcastStream().map<ByteArray>((dynamic value) => value);
-    }
-    return _inputByteStream;
   }
 
   /// Opens the uart communication channel.
@@ -180,13 +172,7 @@ class UsbPort extends AsyncDataSinkSource {
 
   /// Asynchronously writes [data].
   @override
-  Future<void> write(Uint8List data) async {
-    return await _channel.invokeMethod("write", {"data": data});
-  }
-
-  /// Asynchronously writes [data].
-  @override
-  Future<void> writeByteArray(ByteArray data) async {
+  Future<void> write(ByteArray data) async {
     return await _channel.invokeMethod("write", {"data": data});
   }
 

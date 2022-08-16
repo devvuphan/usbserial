@@ -1,7 +1,8 @@
-import 'dart:typed_data';
 import 'dart:async';
 
+import 'package:byte_array/byte_array.dart';
+
 abstract class AsyncDataSinkSource {
-  Future<void> write(Uint8List data);
-  Stream<Uint8List>? get inputStream;
+  Future<void> write(ByteArray data);
+  Stream<ByteArray>? get inputStream;
 }

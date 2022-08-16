@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:byte_array/byte_array.dart';
 import 'package:flutter/material.dart';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
@@ -63,7 +64,10 @@ class _MyAppState extends State<MyApp> {
     await _port!.setRTS(true);
     await _port!.setPortParameters(115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
-    _transaction = Transaction.stringTerminated(_port!.inputStream as Stream<Uint8List>, Uint8List.fromList([13, 10]));
+    ByteArray controlData = ByteArray();
+    controlData.writeByte(13);
+    controlData.writeByte(10);
+    _transaction = Transaction.stringTerminated(_port!.inputStream as Stream<ByteArray>, controlData);
 
     _subscription = _transaction!.stream.listen((String line) {
       setState(() {
@@ -155,7 +159,11 @@ class _MyAppState extends State<MyApp> {
                       return;
                     }
                     String data = _textController.text + "\r\n";
-                    await _port!.write(Uint8List.fromList(data.codeUnits));
+                    ByteArray dataOut = ByteArray();
+                    for (int i = 0; i< data.codeUnits.length; i++) {
+                      dataOut.writeByte(data.codeUnits[i]);
+                    }
+                    await _port!.write(dataOut);
                     _textController.text = "";
                   },
           ),

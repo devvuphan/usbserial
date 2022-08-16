@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:byte_array/byte_array.dart';
 
 import 'transformers.dart';
 import 'types.dart';
@@ -13,17 +13,17 @@ import 'types.dart';
 /// Example
 /// ```dart
 /// // Create a parser that splits incoming data on endline newline combination ( \r\n)
-/// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
+/// var c = Transaction.terminated(p.inputStream, ByteArray.fromList([13, 10]));
 ///
 /// // Listen asynchronously if you need this:
 /// c.stream.listen((data) {
 ///   print("ASYNC LISTEN $data");
 /// });
 ///
-/// var request_1 = Uint8List.fromList([65]);
+/// var request_1 = ByteArray.fromList([65]);
 /// // Wait two seconds for the answer
 ///
-/// Uint8List response_1 = await c.transaction(p, request_1, Duration(seconds: 2));
+/// ByteArray response_1 = await c.transaction(p, request_1, Duration(seconds: 2));
 /// if (response_1 == null ) {
 ///    print("Failed to get a response.");
 /// }
@@ -38,34 +38,34 @@ class Transaction<T> {
   /// events delimited by 'terminator'.
   ///
   /// ```dart
-  /// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
+  /// var c = Transaction.terminated(p.inputStream, ByteArray.fromList([13, 10]));
   /// ```
-  static Transaction<Uint8List> terminated(Stream<Uint8List> stream, Uint8List terminator) {
-    return Transaction<Uint8List>(stream, TerminatedTransformer.broadcast(terminator: terminator));
+  static Transaction<ByteArray> terminated(Stream<ByteArray> stream, ByteArray terminator) {
+    return Transaction<ByteArray>(stream, TerminatedTransformer.broadcast(terminator: terminator));
   }
 
   /// Create a transaction that uses MagicHeaderAndLengthByteTransformer
   ///
   /// ```dart
-  /// Transaction.magicHeader(p.inputStream, Uint8List.fromList([65,65,65])); // expects magic header AAA and then byte of length.
+  /// Transaction.magicHeader(p.inputStream, ByteArray.fromList([65,65,65])); // expects magic header AAA and then byte of length.
   /// ```
-  static Transaction<Uint8List> magicHeader(Stream<Uint8List> stream, List<int> header) {
-    return Transaction<Uint8List>(stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
+  static Transaction<ByteArray> magicHeader(Stream<ByteArray> stream, List<int> header) {
+    return Transaction<ByteArray>(stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
   }
 
   /// Create a transaction that transforms the incoming stream into
   /// events delimited by 'terminator', returning Strings.
   ///
   /// ```dart
-  /// var c = Transaction.stringTerminated(p.inputStream, Uint8List.fromList([13, 10]));
+  /// var c = Transaction.stringTerminated(p.inputStream, ByteArray.fromList([13, 10]));
   /// ```
-  static Transaction<String> stringTerminated(Stream<Uint8List> stream, Uint8List terminator) {
+  static Transaction<String> stringTerminated(Stream<ByteArray> stream, ByteArray terminator) {
     return Transaction<String>(stream, TerminatedStringTransformer.broadcast(terminator: terminator));
   }
 
   /// Transaction Constructor, pass it the untransformed input stream and
   /// the transformer to work on the stream.
-  Transaction(Stream<Uint8List> stream, DisposableStreamTransformer<Uint8List, T> transformer)
+  Transaction(Stream<ByteArray> stream, DisposableStreamTransformer<ByteArray, T> transformer)
       : this.stream = stream.transform(transformer),
         _transformer = transformer {
     _queue = StreamQueue<T>(this.stream);
@@ -118,7 +118,7 @@ class Transaction<T> {
   /// 2. Write the message
   /// 3. Await the answer for at most "duration" time.
   /// returns List of bytes or null on timeout.
-  Future<T?> transaction(AsyncDataSinkSource port, Uint8List message, Duration duration) async {
+  Future<T?> transaction(AsyncDataSinkSource port, ByteArray message, Duration duration) async {
     await flush();
     port.write(message);
     return getMsg(duration);
