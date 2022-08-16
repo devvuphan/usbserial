@@ -103,6 +103,7 @@ public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.Str
                 result.success(open());
                 break;
             case "write":
+                Log.d("UsbSerial", "Sending data: " + (byte[])call.argument("data"))
                 write((byte[])call.argument("data"));
                 result.success(true);
                 break;

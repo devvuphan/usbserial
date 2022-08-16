@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:byte_array/byte_array.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 
@@ -98,6 +99,7 @@ class UsbPort extends AsyncDataSinkSource {
   final MethodChannel _channel;
   final EventChannel _eventChannel;
   Stream<Uint8List>? _inputStream;
+  Stream<ByteArray>? _inputByteStream;
 
   int _baudRate = 115200;
   int _dataBits = UsbPort.DATABITS_8;
@@ -144,6 +146,14 @@ class UsbPort extends AsyncDataSinkSource {
     return _inputStream;
   }
 
+  @override
+  Stream<ByteArray>? get inputByteStream {
+    if (_inputByteStream == null) {
+      _inputByteStream = _eventChannel.receiveBroadcastStream().map<ByteArray>((dynamic value) => value);
+    }
+    return _inputByteStream;
+  }
+
   /// Opens the uart communication channel.
   ///
   /// returns true if successful or false if failed.
@@ -171,6 +181,12 @@ class UsbPort extends AsyncDataSinkSource {
   /// Asynchronously writes [data].
   @override
   Future<void> write(Uint8List data) async {
+    return await _channel.invokeMethod("write", {"data": data});
+  }
+
+  /// Asynchronously writes [data].
+  @override
+  Future<void> writeByteArray(ByteArray data) async {
     return await _channel.invokeMethod("write", {"data": data});
   }
 
