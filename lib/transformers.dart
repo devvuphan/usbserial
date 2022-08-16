@@ -111,18 +111,20 @@ class TerminatedTransformer implements DisposableStreamTransformer<ByteArray, By
       if (index < 0) {
         break;
       }
-      ByteArray message = ByteArray();
       if (stripTerminator) {
+        ByteArray message = ByteArray(_partial.take(index).toList().length);
         for (int i = 0; i < _partial.take(index).toList().length; i++) {
           message.writeByte(_partial.take(index).toList()[i]);
         }
+        _controller.add(message);
       } else {
+        ByteArray message = ByteArray(_partial.take(index + terminator!.length).toList().length);
         for (int i = 0; i < _partial.take(index + terminator!.length).toList().length; i++) {
           message.writeByte(_partial.take(index + terminator!.length).toList()[i]);
         }
+        _controller.add(message);
       }
 
-      _controller.add(message);
       _partial = _partial.sublist(index + terminator!.length);
     }
   }
@@ -219,21 +221,27 @@ class TerminatedStringTransformer implements DisposableStreamTransformer<ByteArr
       if (index < 0) {
         break;
       }
-      ByteArray message = ByteArray();
       if (stripTerminator) {
+        ByteArray message = ByteArray(_partial.take(index).toList().length);
         for (int i = 0; i < _partial.take(index).toList().length; i++) {
           message.writeByte(_partial.take(index).toList()[i]);
         }
+        List<int> dataOut = [];
+        for (int i = 0; i < message.length; i++) {
+          dataOut.add(message[i]);
+        }
+        _controller.add(String.fromCharCodes(dataOut));
       } else {
+        ByteArray message = ByteArray(_partial.take(index + terminator!.length).toList().length);
         for (int i = 0; i < _partial.take(index + terminator!.length).toList().length; i++) {
           message.writeByte(_partial.take(index + terminator!.length).toList()[i]);
         }
+        List<int> dataOut = [];
+        for (int i = 0; i < message.length; i++) {
+          dataOut.add(message[i]);
+        }
+        _controller.add(String.fromCharCodes(dataOut));
       }
-      List<int> dataOut = [];
-      for (int i = 0; i < message.length; i++) {
-        dataOut.add(message[i]);
-      }
-      _controller.add(String.fromCharCodes(dataOut));
       _partial = _partial.sublist(index + terminator!.length);
     }
   }
@@ -339,7 +347,7 @@ class MagicHeaderAndLengthByteTransformer implements DisposableStreamTransformer
         // not completely arrived yet.
         return;
       }
-      ByteArray dataOut = ByteArray();
+      ByteArray dataOut = ByteArray(_partial.sublist(0, len + header!.length + 1).length);
       for (int i = 0; i < _partial.sublist(0, len + header!.length + 1).length; i++) {
         dataOut.writeByte(_partial.sublist(0, len + header!.length + 1)[i]);
       }

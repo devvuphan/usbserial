@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
     await _port!.setRTS(true);
     await _port!.setPortParameters(115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
-    ByteArray controlData = ByteArray();
+    ByteArray controlData = ByteArray(2);
     controlData.writeByte(13);
     controlData.writeByte(10);
     _transaction = Transaction.stringTerminated(_port!.inputStream as Stream<ByteArray>, controlData);
@@ -159,7 +159,7 @@ class _MyAppState extends State<MyApp> {
                       return;
                     }
                     String data = _textController.text + "\r\n";
-                    ByteArray dataOut = ByteArray();
+                    ByteArray dataOut = ByteArray(data.codeUnits.length);
                     for (int i = 0; i< data.codeUnits.length; i++) {
                       dataOut.writeByte(data.codeUnits[i]);
                     }

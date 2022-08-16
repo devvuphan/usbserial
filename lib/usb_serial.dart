@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:byte_array/byte_array.dart';
 import 'package:collection/collection.dart';
